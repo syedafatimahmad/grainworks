@@ -24,6 +24,38 @@ export default function OrderForm({ cart = [], total = 0, onSubmit }) {
   const delivery = deliveryCharges[form.city] || deliveryCharges['Other'];
   const grandTotal = total + delivery;
 
+    // ✅ This is the key: call your API here
+  const handlePlaceOrder = async () => {
+    const orderData = {
+      orderId: Date.now(),
+      name: form.name,
+      email: form.email, // you need to add email input if you want confirmation
+      phone: form.phone,
+      address: form.address,
+      city: form.city,
+      payment: form.payment,
+      items: cart,
+      total: grandTotal
+    };
+
+    try {
+      const res = await fetch('/api/place-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderData)
+      });
+
+      if (res.ok) {
+        alert('Order placed successfully!');
+      } else {
+        alert('Something went wrong. Try again.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Something went wrong. Try again.');
+    }
+  };
+
   return (
     <section className="pt-36 pb-32 bg-white">
       <div className="max-w-2xl mx-auto px-6">
@@ -40,6 +72,15 @@ export default function OrderForm({ cart = [], total = 0, onSubmit }) {
             placeholder="Full Name"
             className="w-full p-4 border rounded-lg"
           />
+          <input
+            type="email"
+            name="email"
+            value={form.email || ''}
+            onChange={handleChange}
+            placeholder="Email Address"
+            className="w-full p-4 border rounded-lg"
+          />
+
           <input
             type="tel"
             name="phone"
@@ -95,7 +136,7 @@ export default function OrderForm({ cart = [], total = 0, onSubmit }) {
           </div>
 
           <button
-            onClick={() => onSubmit(form, grandTotal)}
+            onClick={handlePlaceOrder}
             className="mt-6 w-full py-4 rounded-xl bg-[#628141] text-white font-medium hover:bg-[#516B36] transition"
           >
             Confirm Order

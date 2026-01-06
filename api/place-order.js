@@ -53,7 +53,7 @@ export default async function handler(req, res) {
 
   if (errors.length) return res.status(400).json({ error: 'Invalid order', details: errors });
 
-  const companyEmail = COMPANY_EMAIL || 'owner@example.com';
+  const companyEmail = COMPANY_EMAIL || 'fatima.ahmad6543@gmail.com';
 
   const customerHtml = `
     <h2>Thanks for your order, ${escapeHtml(order.name)}!</h2>

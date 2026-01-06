@@ -7,14 +7,16 @@ const deliveryCharges = {
   Other: 250
 };
 
-export default function OrderForm({ cart = [], total = 0, onSubmit }) {
+export default function OrderForm({ cart = [], total = 0 }) {
   const [form, setForm] = useState({
     name: '',
+    email: '',
     phone: '',
     address: '',
     city: 'Karachi',
     payment: 'Cash'
   });
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -24,16 +26,11 @@ export default function OrderForm({ cart = [], total = 0, onSubmit }) {
   const delivery = deliveryCharges[form.city] || deliveryCharges['Other'];
   const grandTotal = total + delivery;
 
-    // ✅ This is the key: call your API here
   const handlePlaceOrder = async () => {
+    setLoading(true);
     const orderData = {
       orderId: Date.now(),
-      name: form.name,
-      email: form.email, // you need to add email input if you want confirmation
-      phone: form.phone,
-      address: form.address,
-      city: form.city,
-      payment: form.payment,
+      ...form,
       items: cart,
       total: grandTotal
     };
@@ -45,14 +42,19 @@ export default function OrderForm({ cart = [], total = 0, onSubmit }) {
         body: JSON.stringify(orderData)
       });
 
+      const data = await res.json();
+
       if (res.ok) {
-        alert('Order placed successfully!');
+        alert('✅ Order placed successfully!');
       } else {
-        alert('Something went wrong. Try again.');
+        console.error('API error:', data);
+        alert(`❌ Something went wrong: ${data.error}${data.details ? ' - ' + data.details.join(', ') : ''}`);
       }
     } catch (err) {
-      console.error(err);
-      alert('Something went wrong. Try again.');
+      console.error('Fetch error:', err);
+      alert(`❌ Something went wrong: ${err.message}`);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -64,72 +66,28 @@ export default function OrderForm({ cart = [], total = 0, onSubmit }) {
         </h2>
 
         <div className="space-y-6">
-          <input
-            type="text"
-            name="name"
-            value={form.name}
-            onChange={handleChange}
-            placeholder="Full Name"
-            className="w-full p-4 border rounded-lg"
-          />
-          <input
-            type="email"
-            name="email"
-            value={form.email || ''}
-            onChange={handleChange}
-            placeholder="Email Address"
-            className="w-full p-4 border rounded-lg"
-          />
+          <input type="text" name="name" value={form.name} onChange={handleChange} placeholder="Full Name" required className="w-full p-4 border rounded-lg" />
+          <input type="email" name="email" value={form.email} onChange={handleChange} placeholder="Email Address" required className="w-full p-4 border rounded-lg" />
+          <input type="tel" name="phone" value={form.phone} onChange={handleChange} placeholder="Phone Number" required className="w-full p-4 border rounded-lg" />
+          <input type="text" name="address" value={form.address} onChange={handleChange} placeholder="Address" className="w-full p-4 border rounded-lg" />
 
-          <input
-            type="tel"
-            name="phone"
-            value={form.phone}
-            onChange={handleChange}
-            placeholder="Phone Number"
-            className="w-full p-4 border rounded-lg"
-          />
-          <input
-            type="text"
-            name="address"
-            value={form.address}
-            onChange={handleChange}
-            placeholder="Address"
-            className="w-full p-4 border rounded-lg"
-          />
-
-          <select
-            name="city"
-            value={form.city}
-            onChange={handleChange}
-            className="w-full p-4 border rounded-lg"
-          >
-            {Object.keys(deliveryCharges).map(city => (
-              <option key={city} value={city}>{city}</option>
-            ))}
+          <select name="city" value={form.city} onChange={handleChange} className="w-full p-4 border rounded-lg">
+            {Object.keys(deliveryCharges).map(city => <option key={city} value={city}>{city}</option>)}
           </select>
 
-          <select
-            name="payment"
-            value={form.payment}
-            onChange={handleChange}
-            className="w-full p-4 border rounded-lg"
-          >
+          <select name="payment" value={form.payment} onChange={handleChange} className="w-full p-4 border rounded-lg">
             <option value="Cash">Cash on Delivery</option>
             <option value="Card">Credit/Debit Card</option>
           </select>
 
-          {/* Totals */}
           <div className="flex justify-between font-semibold text-lg pt-4">
             <span>Subtotal</span>
             <span>Rs {total}/-</span>
           </div>
-
           <div className="flex justify-between font-semibold text-lg pt-4">
             <span>Delivery Charges</span>
             <span>Rs {delivery}/-</span>
           </div>
-
           <div className="flex justify-between font-semibold text-lg pt-2">
             <span>Grand Total</span>
             <span>Rs {grandTotal}/-</span>
@@ -137,12 +95,13 @@ export default function OrderForm({ cart = [], total = 0, onSubmit }) {
 
           <button
             onClick={handlePlaceOrder}
-            className="mt-6 w-full py-4 rounded-xl bg-[#628141] text-white font-medium hover:bg-[#516B36] transition"
+            disabled={loading}
+            className={`mt-6 w-full py-4 rounded-xl bg-[#628141] text-white font-medium hover:bg-[#516B36] transition ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
-            Confirm Order
+            {loading ? 'Placing Order...' : 'Confirm Order'}
           </button>
         </div>
       </div>
     </section>
-  )
+  );
 }

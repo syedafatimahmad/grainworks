@@ -42,13 +42,21 @@ export default function OrderForm({ cart = [], total = 0 }) {
         body: JSON.stringify(orderData)
       });
 
-      const data = await res.json();
+      const text = await res.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        data = { error: text };
+      }
 
       if (res.ok) {
         alert('✅ Order placed successfully!');
       } else {
         console.error('API error:', data);
-        alert(`❌ Something went wrong: ${data.error}${data.details ? ' - ' + data.details.join(', ') : ''}`);
+        const details = Array.isArray(data.details) ? ' - ' + data.details.join(', ') : '';
+        const message = data.error || 'Server error';
+        alert(`❌ Something went wrong: ${message}${details}`);
       }
     } catch (err) {
       console.error('Fetch error:', err);

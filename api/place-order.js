@@ -68,34 +68,58 @@ export default async function handler(req, res) {
         const fromEmail = FROM_EMAIL || companyEmail;
         // customer email design
         const customerHtml = `
-<div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background-color: #f9f9f9;">
-  <h2 style="color: #2A3A2A;">Thank you for your order, ${escapeHtml(order.name)}!</h2>
-  <p style="font-size: 16px; color: #555;">We have received your order successfully. Here are the details:</p>
+<div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 100%; width: 650px; margin: 0 auto; padding: 20px; border-radius: 12px; background-color: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.08); color: #333;">
+  <h2 style="color: #2A3A2A; font-size: 22px; margin-bottom: 10px;">Thank you for your order, ${escapeHtml(order.name)}!</h2>
+  <p style="font-size: 16px; color: #555; line-height: 1.5; margin-bottom: 20px;">
+    Your order has been received and is being processed. Here’s a summary:
+  </p>
 
-  <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+  <table style="width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 20px;">
     <tr>
-      <td style="font-weight: bold; padding: 8px; border-bottom: 1px solid #ddd;">Order ID:</td>
-      <td style="padding: 8px; border-bottom: 1px solid #ddd;">${escapeHtml(order.orderId)}</td>
+      <td style="font-weight: bold; padding: 8px; border-bottom: 1px solid #eee;">Order ID</td>
+      <td style="padding: 8px; border-bottom: 1px solid #eee;">${escapeHtml(order.orderId)}</td>
     </tr>
     <tr>
-      <td style="font-weight: bold; padding: 8px; border-bottom: 1px solid #ddd;">Total:</td>
-      <td style="padding: 8px; border-bottom: 1px solid #ddd;">Rs ${escapeHtml(order.total)}</td>
+      <td style="font-weight: bold; padding: 8px; border-bottom: 1px solid #eee;">Total</td>
+      <td style="padding: 8px; border-bottom: 1px solid #eee;">Rs ${escapeHtml(order.total)}</td>
+    </tr>
+    <tr>
+      <td style="font-weight: bold; padding: 8px; border-bottom: 1px solid #eee;">Phone</td>
+      <td style="padding: 8px; border-bottom: 1px solid #eee;">${escapeHtml(order.phone || '-')}</td>
+    </tr>
+    <tr>
+      <td style="font-weight: bold; padding: 8px; border-bottom: 1px solid #eee;">Email</td>
+      <td style="padding: 8px; border-bottom: 1px solid #eee;">${escapeHtml(order.email)}</td>
+    </tr>
+    <tr>
+      <td style="font-weight: bold; padding: 8px; border-bottom: 1px solid #eee;">Address</td>
+      <td style="padding: 8px; border-bottom: 1px solid #eee;">${escapeHtml(order.address || '-')}, ${escapeHtml(order.city || '-')}</td>
+    </tr>
+    <tr>
+      <td style="font-weight: bold; padding: 8px; border-bottom: 1px solid #eee;">Payment</td>
+      <td style="padding: 8px; border-bottom: 1px solid #eee;">${escapeHtml(order.payment)}</td>
     </tr>
   </table>
 
-  <h3 style="margin-top: 20px; color: #2A3A2A;">Items Ordered:</h3>
-  <ul style="padding-left: 20px; color: #555;">
+  <h3 style="margin-top: 20px; font-size: 18px; color: #2A3A2A;">Items Ordered</h3>
+  <ul style="padding-left: 20px; margin-top: 10px; margin-bottom: 25px; color: #555; line-height: 1.6;">
     ${order.items.map(i => `<li>${escapeHtml(i.name)} x ${escapeHtml(String(i.quantity))}</li>`).join('')}
   </ul>
 
-  <p style="font-size: 14px; color: #777; margin-top: 30px;">
-    Your order is being processed and we will notify you once it’s shipped.<br>
-    If you have any questions, reply to this email or contact us at ${escapeHtml(companyEmail)}.
+  <p style="font-size: 14px; color: #777; line-height: 1.5; margin-bottom: 10px;">
+    Your order is being prepared. We will notify you once it is shipped. If you have any questions, reply to this email or contact us at <a href="mailto:${escapeHtml(companyEmail)}" style="color: #628141; text-decoration: none;">${escapeHtml(companyEmail)}</a>.
   </p>
 
-  <p style="font-size: 14px; color: #777; margin-top: 10px;">Thank you for choosing GrainWorks!</p>
+  <p style="font-size: 14px; color: #777; margin-top: 5px;">Thank you for choosing <strong>GrainWorks</strong>!</p>
+
+  <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+
+  <p style="font-size: 12px; color: #aaa; text-align: center;">
+    &copy; ${new Date().getFullYear()} GrainWorks. All rights reserved.
+  </p>
 </div>
 `;
+
 
         // business email design
 

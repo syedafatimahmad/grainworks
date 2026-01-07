@@ -157,24 +157,34 @@ export default async function handler(req, res) {
 </div>
 `;
 
-        // Send confirmation to customer
-        await resend.emails.send({
+        // Send confirmation to customer (log response for debugging)
+        let customerResult, businessResult;
+        try {
+          customerResult = await resend.emails.send({
             from: `Website Orders <${fromEmail}>`,
             to: order.email,
             subject: 'Order Confirmed',
             html: customerHtml,
-        });
+          });
+          console.log('Resend customer send result:', { to: order.email, id: customerResult?.id });
+        } catch (sendErr) {
+          console.error('Resend customer send error:', sendErr, 'to:', order.email);
+        }
 
-        // Send internal notification
-        await resend.emails.send({
+        // Send internal notification (log response)
+        try {
+          businessResult = await resend.emails.send({
             from: `Website Orders <${fromEmail}>`,
             to: companyEmail,
             subject: `New Order ${escapeHtml(order.orderId)}`,
             html: businessHtml
-        });
+          });
+          console.log('Resend business send result:', { to: companyEmail, id: businessResult?.id });
+        } catch (sendErr) {
+          console.error('Resend business send error:', sendErr, 'to:', companyEmail);
+        }
 
-
-        return res.status(200).json({ success: true });
+        return res.status(200).json({ success: true, customerMessageId: customerResult?.id, businessMessageId: businessResult?.id, attemptedTo: order.email });
     } catch (err) {
         console.error('place-order error:', err);
         return res.status(500).json({ error: 'Internal server error', details: err.message });

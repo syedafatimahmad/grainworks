@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import ConfirmationModal from '../components/ConfirmationModal';
 
 const deliveryCharges = {
   Karachi: 200,
@@ -17,6 +18,7 @@ export default function OrderForm({ cart = [], total = 0 }) {
     payment: 'Cash',
   });
   const [loading, setLoading] = useState(false);
+  const [orderConfirmation, setOrderConfirmation] = useState(null); // modal state
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -44,17 +46,18 @@ export default function OrderForm({ cart = [], total = 0 }) {
 
       const text = await res.text();
       let data;
-      try {
-        data = JSON.parse(text);
-      } catch {
-        data = { error: text };
-      }
-
-      console.log('API raw response text:', text);
-      console.log('API response object:', data);
+      try { data = JSON.parse(text); } catch { data = { error: text }; }
 
       if (res.ok) {
-        alert(`✅ Order placed successfully!`);
+        // show modal instead of alert
+        setOrderConfirmation({
+          id: data.id || 'ORD123456',
+          date: new Date().toLocaleDateString(),
+          eventName: 'Your Order',
+          eventDate: new Date().toLocaleDateString(),
+          registerDate: new Date().toLocaleString(),
+        });
+
         setForm({
           name: '',
           email: '',
@@ -65,11 +68,14 @@ export default function OrderForm({ cart = [], total = 0 }) {
         });
       } else {
         const details = Array.isArray(data.details) ? ' - ' + data.details.join(', ') : '';
-        alert(`❌ Something went wrong: ${data.error || 'Server error'}${details}`);
+        setOrderConfirmation({
+          error: data.error + details || 'Server error',
+        });
       }
     } catch (err) {
-      console.error('Fetch error:', err);
-      alert(`❌ Something went wrong: ${err.message}`);
+      setOrderConfirmation({
+        error: `Something went wrong: ${err.message}`,
+      });
     } finally {
       setLoading(false);
     }
@@ -83,89 +89,44 @@ export default function OrderForm({ cart = [], total = 0 }) {
         </h2>
 
         <div className="space-y-6">
-          <input
-            type="text"
-            name="name"
-            value={form.name}
-            onChange={handleChange}
-            placeholder="Full Name"
-            required
-            className="w-full p-4 border rounded-lg"
-          />
-          <input
-            type="email"
-            name="email"
-            value={form.email}
-            onChange={handleChange}
-            placeholder="Email Address"
-            required
-            className="w-full p-4 border rounded-lg"
-          />
-          <input
-            type="tel"
-            name="phone"
-            value={form.phone}
-            onChange={handleChange}
-            placeholder="Phone Number"
-            required
-            className="w-full p-4 border rounded-lg"
-          />
-          <input
-            type="text"
-            name="address"
-            value={form.address}
-            onChange={handleChange}
-            placeholder="Address"
-            className="w-full p-4 border rounded-lg"
-          />
+          {/* Inputs */}
+          <input type="text" name="name" value={form.name} onChange={handleChange} placeholder="Full Name" required className="w-full p-4 border rounded-lg" />
+          <input type="email" name="email" value={form.email} onChange={handleChange} placeholder="Email Address" required className="w-full p-4 border rounded-lg" />
+          <input type="tel" name="phone" value={form.phone} onChange={handleChange} placeholder="Phone Number" required className="w-full p-4 border rounded-lg" />
+          <input type="text" name="address" value={form.address} onChange={handleChange} placeholder="Address" className="w-full p-4 border rounded-lg" />
 
-          <select
-            name="city"
-            value={form.city}
-            onChange={handleChange}
-            className="w-full p-4 border rounded-lg"
-          >
-            {Object.keys(deliveryCharges).map((city) => (
-              <option key={city} value={city}>
-                {city}
-              </option>
-            ))}
+          {/* Selects */}
+          <select name="city" value={form.city} onChange={handleChange} className="w-full p-4 border rounded-lg">
+            {Object.keys(deliveryCharges).map((city) => <option key={city} value={city}>{city}</option>)}
           </select>
-
-          <select
-            name="payment"
-            value={form.payment}
-            onChange={handleChange}
-            className="w-full p-4 border rounded-lg"
-          >
+          <select name="payment" value={form.payment} onChange={handleChange} className="w-full p-4 border rounded-lg">
             <option value="Cash">Cash on Delivery</option>
             <option value="Card">Credit/Debit Card</option>
           </select>
 
-          <div className="flex justify-between font-semibold text-lg pt-4">
-            <span>Subtotal</span>
-            <span>Rs {total}/-</span>
-          </div>
-          <div className="flex justify-between font-semibold text-lg pt-4">
-            <span>Delivery Charges</span>
-            <span>Rs {delivery}/-</span>
-          </div>
-          <div className="flex justify-between font-semibold text-lg pt-2">
-            <span>Grand Total</span>
-            <span>Rs {grandTotal}/-</span>
-          </div>
+          {/* Totals */}
+          <div className="flex justify-between font-semibold text-lg pt-4"><span>Subtotal</span><span>Rs {total}/-</span></div>
+          <div className="flex justify-between font-semibold text-lg pt-4"><span>Delivery Charges</span><span>Rs {delivery}/-</span></div>
+          <div className="flex justify-between font-semibold text-lg pt-2"><span>Grand Total</span><span>Rs {grandTotal}/-</span></div>
 
           <button
             onClick={handlePlaceOrder}
             disabled={loading}
-            className={`mt-6 w-full py-4 rounded-xl bg-[#628141] text-white font-medium hover:bg-[#516B36] transition ${
-              loading ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
+            className={`mt-6 w-full py-4 rounded-xl bg-[#628141] text-white font-medium hover:bg-[#516B36] transition ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             {loading ? 'Placing Order...' : 'Confirm Order'}
           </button>
         </div>
       </div>
+
+      {/* Confirmation Modal */}
+      {orderConfirmation && (
+        <ConfirmationModal
+          order={orderConfirmation.error ? null : orderConfirmation}
+          error={orderConfirmation.error}
+          onClose={() => setOrderConfirmation(null)}
+        />
+      )}
     </section>
   );
 }

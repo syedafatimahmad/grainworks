@@ -66,7 +66,7 @@ export default async function handler(req, res) {
 
         const companyEmail = COMPANY_EMAIL || 'onboarding@resend.dev';
         const fromEmail = FROM_EMAIL || companyEmail;
-        // email design
+        // customer email design
         const customerHtml = `
 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background-color: #f9f9f9;">
   <h2 style="color: #2A3A2A;">Thank you for your order, ${escapeHtml(order.name)}!</h2>
@@ -97,6 +97,41 @@ export default async function handler(req, res) {
 </div>
 `;
 
+        // business email design
+
+        const businessHtml = `
+<div style="font-family:Arial,sans-serif; max-width:600px; margin:30px auto; background:#fff; padding:20px; border-radius:8px; box-shadow:0 4px 10px rgba(0,0,0,0.1);">
+  <h1 style="color:#628141;">New Order Received</h1>
+  <p><strong>Order ID:</strong> ${escapeHtml(order.orderId)}</p>
+  <p><strong>Total:</strong> Rs ${escapeHtml(String(order.total))}/-</p>
+  <p><strong>City:</strong> ${escapeHtml(order.city)}</p>
+  <p><strong>Payment Method:</strong> ${escapeHtml(order.payment)}</p>
+
+  <h2 style="margin-top:20px;border-bottom:1px solid #ddd;padding-bottom:5px;">Customer Details</h2>
+  <p><strong>Name:</strong> ${escapeHtml(order.name)}</p>
+  <p><strong>Email:</strong> ${escapeHtml(order.email)}</p>
+  <p><strong>Phone:</strong> ${escapeHtml(order.phone)}</p>
+  <p><strong>Address:</strong> ${escapeHtml(order.address)}</p>
+
+  <h2 style="margin-top:20px;border-bottom:1px solid #ddd;padding-bottom:5px;">Order Items</h2>
+  <table style="border-collapse:collapse;width:100%;margin-top:10px;">
+    <thead>
+      <tr>
+        <th style="border:1px solid #ddd;padding:10px;background:#f2f2f2;">Item Name</th>
+        <th style="border:1px solid #ddd;padding:10px;background:#f2f2f2;">Quantity</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${order.items.map(i => `
+        <tr>
+          <td style="border:1px solid #ddd;padding:10px;">${escapeHtml(i.name)}</td>
+          <td style="border:1px solid #ddd;padding:10px;">${escapeHtml(String(i.quantity))}</td>
+        </tr>
+      `).join('')}
+    </tbody>
+  </table>
+</div>
+`;
 
         // Send confirmation to customer
         await resend.emails.send({
@@ -110,9 +145,10 @@ export default async function handler(req, res) {
         await resend.emails.send({
             from: `Website Orders <${fromEmail}>`,
             to: companyEmail,
-            subject: `New Order ${escapeHtml(String(order.orderId))}`,
-            html: `<pre>${escapeHtml(JSON.stringify(order, null, 2))}</pre>`
+            subject: `New Order ${escapeHtml(order.orderId)}`,
+            html: businessHtml
         });
+
 
         return res.status(200).json({ success: true });
     } catch (err) {

@@ -1,4 +1,5 @@
 import { Resend } from 'resend';
+import crypto from 'crypto';
 
 function escapeHtml(input) {
   if (typeof input !== 'string') return String(input ?? '');
@@ -45,6 +46,13 @@ export default async function handler(req, res) {
       }
     }
     order = order || {};
+
+    // Ensure server generates an orderId when client doesn't provide one
+    if (!order.orderId) {
+      order.orderId = typeof crypto.randomUUID === 'function'
+        ? crypto.randomUUID()
+        : `ORD-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+    }
 
     // Basic validation
     const errors = [];

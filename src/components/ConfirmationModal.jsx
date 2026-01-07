@@ -25,7 +25,7 @@ export default function ConfirmationModal({ order, onClose }) {
         </div>
 
         <h2 className="text-center text-2xl font-semibold mb-2 text-[#2A3A2A]">
-          Success! Your order is placed.
+          Success!
         </h2>
         <p className="text-center text-black/60 mb-6">
           Check your email for confirmation.
@@ -44,12 +44,12 @@ export default function ConfirmationModal({ order, onClose }) {
           <div className="bg-white rounded-xl p-4 mb-6 space-y-2 border border-black/10">
             <h3 className="font-semibold text-[#2A3A2A] mb-2">Items:</h3>
             {order.items.map((item, idx) => (
-              <div key={idx} className="flex justify-between text-black/80">
-                <br>
+              <div key={idx} className="flex justify-between text-black/80 items-center">
+                <span className="truncate">
                   {item.name} {item.size ? `(Size: ${item.size})` : ''}
-                </br>
-                <br>Qty: {item.quantity}</br>
-                <br>Rs {item.price * item.quantity}/-</br>
+                </span>
+                <span className="mx-4">Qty: {item.quantity}</span>
+                <span>Rs {item.price * item.quantity}/-</span>
               </div>
             ))}
             <div className="flex justify-between font-bold mt-2 text-[#2A3A2A]">

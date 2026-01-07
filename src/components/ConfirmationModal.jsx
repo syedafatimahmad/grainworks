@@ -34,23 +34,7 @@ export default function ConfirmationModal({ order, onClose }) {
         {/* Order Details */}
         <div className="bg-[#628141]/10 rounded-xl p-4 mb-6 space-y-2">
           <div className="flex justify-between">
-            <span className="text-black/60">Order Number</span>
-            <span className="font-medium">{order.id}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-black/60">Order Date</span>
-            <span className="font-medium">{order.date}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-black/60">Event Name</span>
-            <span className="font-medium">{order.eventName}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-black/60">Event Date</span>
-            <span className="font-medium">{order.eventDate}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-black/60">Register Date</span>
+            <span className="text-black/60">Date</span>
             <span className="font-medium">{order.registerDate}</span>
           </div>
         </div>
@@ -80,7 +64,7 @@ export default function ConfirmationModal({ order, onClose }) {
           onClick={onClose}
           className="w-full py-4 rounded-xl bg-[#628141] text-white font-medium hover:bg-[#516B36] transition"
         >
-          Back to Home
+          Back
         </button>
       </div>
     </div>

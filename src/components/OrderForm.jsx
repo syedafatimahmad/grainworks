@@ -49,12 +49,13 @@ export default function OrderForm({ cart = [], total = 0 }) {
       try { data = JSON.parse(text); } catch { data = { error: text }; }
 
       if (res.ok) {
-        // show modal instead of alert
+        // show modal with order details (capture current form/cart before clearing)
         setOrderConfirmation({
           id: data.id || 'ORD123456',
-          date: new Date().toLocaleDateString(),
-          eventName: 'Your Order',
-          eventDate: new Date().toLocaleDateString(),
+          name: form.name,
+          email: form.email,
+          items: cart,
+          total: grandTotal,
           registerDate: new Date().toLocaleString(),
         });
 

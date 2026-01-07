@@ -50,10 +50,13 @@ export default function OrderForm({ cart = [], total = 0 }) {
         data = { error: text };
       }
 
+      // Log raw text and formatted object for debugging
+      console.error('API raw response text:', text);
+      try { console.error('API error object:', JSON.stringify(data, null, 2)); } catch (e) { console.error('API error object (could not stringify)'); }
+
       if (res.ok) {
         alert('✅ Order placed successfully!');
       } else {
-        console.error('API error:', data);
         const details = Array.isArray(data.details) ? ' - ' + data.details.join(', ') : '';
         const message = data.error || 'Server error';
         alert(`❌ Something went wrong: ${message}${details}`);

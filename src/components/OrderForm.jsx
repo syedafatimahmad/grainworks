@@ -55,8 +55,9 @@ export default function OrderForm({ cart = [], total = 0 }) {
           name: form.name,
           email: form.email,
           items: cart,
-          total: grandTotal,
-          registerDate: new Date().toLocaleString(),
+            total: grandTotal,
+            date: new Date().toLocaleDateString(),
+            registerDate: new Date().toLocaleString(),
         });
 
         setForm({

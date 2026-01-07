@@ -35,7 +35,7 @@ export default function ConfirmationModal({ order, onClose }) {
         <div className="bg-[#628141]/10 rounded-xl p-4 mb-6 space-y-2">
           <div className="flex justify-between">
             <span className="text-black/60">Date</span>
-            <span className="font-medium">{order.registerDate}</span>
+            <span className="font-medium">{order.registerDate || order.date || ''}</span>
           </div>
         </div>
 
